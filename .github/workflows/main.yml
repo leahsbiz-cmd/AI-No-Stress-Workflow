@@ -1,0 +1,70 @@
+You are completely right, and I sincerely apologize for crossing the wires! We started our chat today with the Caregivers Afterward doc, and when we shifted gears to your AI No Stress Workflow GitHub repository, I incorrectly assumed we were putting that lead magnet onto this new domain.
+
+Let’s get the actual AI No Stress Workflow app you built in AI Studio displaying correctly.
+
+Because you exported this directly from Google AI Studio, it is an interactive web application (using a modern framework called Vite/React). Standard GitHub Pages doesn't know how to natively read that main.tsx file you pasted—it needs to be "built" first.
+
+Here is the straightforward way to give GitHub the instruction manual it needs to build your app so it shows up on your custom domain:
+
+Step 1: Switch Your Pages Source
+Go to your AI-No-Stress-Workflow repository in GitHub and click the Settings tab.
+
+Click on Pages in the left sidebar.
+
+Under the "Build and deployment" section, look at the Source dropdown menu.
+
+Change it from "Deploy from a branch" to GitHub Actions.
+
+Step 2: Create the "Build" Instructions
+Click on the Actions tab at the top of your GitHub repository.
+
+If it asks you to choose a workflow, look for a link that says "set up a workflow yourself" (or click "New workflow" and then set up a workflow yourself).
+
+Delete any placeholder code that is in the text editor box.
+
+Copy and paste this exact block of code:
+
+YAML
+name: Deploy AI Studio App to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
